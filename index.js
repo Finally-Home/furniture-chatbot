@@ -5,6 +5,12 @@ import dotenv from 'dotenv';
 import fs from 'node:fs';
 import csv from 'csv-parser';
 
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
 // ✅ Declare data containers
 const products = [];
 const reviews = [];
@@ -23,8 +29,15 @@ fs.createReadStream('./main-products-cleaned.csv')
       .on('end', () => {
         console.log(`✅ Loaded ${reviews.length} reviews into memory`);
 
-        // ✅ Chat endpoint — MUST go here
-        app.post('/chat', async (req, res) => {
+        // ✅ Start server AFTER loading
+        app.listen(3000, () => {
+          console.log('🚀 Server running on port 3000');
+        });
+      });
+  });
+
+// ✅ Chat endpoint (OUTSIDE of CSV loaders)
+app.post('/chat', async (req, res) => {
   try {
     console.log('🧪 Chatbot hit!');
     const { messages } = req.body;
@@ -39,10 +52,3 @@ fs.createReadStream('./main-products-cleaned.csv')
     res.status(500).json({ error: 'Something went wrong.' });
   }
 });
-
-        // ✅ Start server
-        app.listen(3000, () => {
-          console.log('🚀 Server running on port 3000');
-        });
-      }); // close reviews
-  }); // close products
