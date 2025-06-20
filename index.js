@@ -28,25 +28,41 @@ fs.createReadStream('./main-products-cleaned.csv')
       .on('end', () => {
         console.log(`✅ Loaded ${reviews.length} reviews into memory`);
 
-        // ✅ Chatbot endpoint
-        app.post('/chat', (req, res) => {
-  try {
-    const { messages } = req.body;
+      
+       // ✅ Chatbot endpoint
+app.post('/chat', async (req, res) => {
+  const messages = req.body.messages;
 
-    if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: 'Invalid messages format.' });
-    }
-
-    const userMessage = messages[messages.length - 1]?.content || 'No message found';
-    const productName = products[0]?.Title || 'No product found';
-
-    res.json({
-      response: `You said: "${userMessage}". First product is: ${productName}.`
-    });
-  } catch (err) {
-    console.error('❌ Chatbot error:', err);
-    res.status(500).json({ error: 'Internal server error.' });
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: "Invalid messages format." });
   }
+
+  const userMessage = messages[0];
+  const lowerMsg = userMessage.toLowerCase();
+  const priceMatch = userMessage.match(/\$?(\d+)(?!\d)/);
+  const maxPrice = priceMatch ? parseInt(priceMatch[1]) : null;
+
+  let filtered = products;
+
+  if (lowerMsg.includes('sectional')) {
+    filtered = filtered.filter(p =>
+      p.title.toLowerCase().includes('sectional')
+    );
+  }
+
+  if (maxPrice) {
+    filtered = filtered.filter(p => {
+      const price = parseFloat(p.price || '0');
+      return price <= maxPrice;
+    });
+  }
+
+  const firstResult = filtered[0];
+  const responseText = firstResult
+    ? `You asked: "${userMessage}". First matching product: ${firstResult.title} – $${firstResult.price}`
+    : `You asked: "${userMessage}". Sorry, I couldn't find any matching products.`;
+
+  res.json({ response: responseText });
 });
 
         // ✅ Start server
