@@ -57,8 +57,8 @@ fs.createReadStream('./main-products-cleaned.csv')
           res.json({ response: responseText });
         });
 
-        app.listen(3000, () => {
+                app.listen(3000, () => {
           console.log('🚀 Server running on port 3000');
         });
-      });
-  });
+      }); // closes .on('end') for reviews.csv
+  });     // closes .on('end') for products.csv
