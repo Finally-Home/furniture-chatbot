@@ -34,6 +34,7 @@ fs.createReadStream('./main-products-cleaned.csv')
           try {
             console.log('🧪 Chatbot hit!');
             const { messages } = req.body;
+            console.log('🔍 First product object:', products[0]);
 
             const firstProduct = products[0]?.Product_Title || 'No products loaded';
             res.json({
