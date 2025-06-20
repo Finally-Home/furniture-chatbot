@@ -29,7 +29,7 @@ fs.createReadStream('./main-products-cleaned.csv')
         console.log(`✅ Loaded ${reviews.length} reviews into memory`);
 
       
-       // ✅ Chatbot endpoint
+      // ✅ Chatbot endpoint
 app.post('/chat', async (req, res) => {
   const messages = req.body.messages;
 
@@ -65,9 +65,7 @@ app.post('/chat', async (req, res) => {
   res.json({ response: responseText });
 });
 
-        // ✅ Start server
-        app.listen(3000, () => {
-          console.log('🚀 Server running on port 3000');
-        });
-      });
-  });
+// ✅ Start server
+app.listen(3000, () => {
+  console.log('🚀 Server running on port 3000');
+});
