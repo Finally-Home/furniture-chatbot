@@ -25,20 +25,20 @@ fs.createReadStream('./main-products-cleaned.csv')
 
         // ✅ Chat endpoint — MUST go here
         app.post('/chat', async (req, res) => {
-          try {
-            console.log('🧪 Chatbot hit!');
-            const { messages } = req.body;
-            console.log('🔍 First product object:', products[0]);
+  try {
+    console.log('🧪 Chatbot hit!');
+    const { messages } = req.body;
+    console.log('🔍 First product object:', products[0]);
 
-            const firstProduct = products[0]?.Title || 'No products loaded';
-            res.json({
-              response: `You asked: ${messages}. First product I know is: ${firstProduct}`
-            });
-          } catch (err) {
-            console.error('❌ Chatbot error:', err);
-            res.status(500).json({ error: 'Something went wrong.' });
-          }
-        });
+    const firstProduct = products[0]?.Title || 'No products loaded';
+    res.json({
+      response: `You asked: ${messages}. First product I know is: ${firstProduct}`
+    });
+  } catch (err) {
+    console.error('❌ Chatbot error:', err);
+    res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
 
         // ✅ Start server
         app.listen(3000, () => {
