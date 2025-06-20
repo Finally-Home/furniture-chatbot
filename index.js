@@ -1,8 +1,9 @@
-const express = require('express');
-const fs = require('fs');
-const csv = require('csv-parser');
-const app = express();
-app.use(express.json());
+import express from 'express';
+import axios from 'axios';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import fs from 'node:fs';
+import csv from 'csv-parser';
 
 // ✅ Declare data containers
 const products = [];
