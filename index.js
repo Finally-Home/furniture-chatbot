@@ -2,7 +2,7 @@ import express from 'express';
 import axios from 'axios';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import fs from 'node:fs'; // ✅ FIXED for ES modules
+import fs from 'node:fs';
 import csv from 'csv-parser';
 
 dotenv.config();
@@ -29,17 +29,13 @@ fs.createReadStream('./main-products-cleaned.csv')
       .on('end', () => {
         console.log(`✅ Loaded ${reviews.length} reviews into memory`);
 
-        // ✅ Start server AFTER both CSVs are ready
-        app.listen(3000, () => {
-          console.log('🚀 Server running on port 3000');
-        });
-
-        // ✅ Chat endpoint
+        // ✅ Chat endpoint — MUST go here
         app.post('/chat', async (req, res) => {
           try {
+            console.log('🧪 Chatbot hit!');
             const { messages } = req.body;
-            const firstProduct = products[0]?.Product_Title || 'No products loaded';
 
+            const firstProduct = products[0]?.Product_Title || 'No products loaded';
             res.json({
               response: `You asked: ${messages}. First product I know is: ${firstProduct}`
             });
@@ -48,5 +44,10 @@ fs.createReadStream('./main-products-cleaned.csv')
             res.status(500).json({ error: 'Something went wrong.' });
           }
         });
-      });
-  });
+
+        // ✅ Start server
+        app.listen(3000, () => {
+          console.log('🚀 Server running on port 3000');
+        });
+      }); // close reviews
+  }); // close products
