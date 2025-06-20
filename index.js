@@ -18,13 +18,22 @@ const reviews = [];
 fs.createReadStream('./main-products-cleaned.csv')
   .pipe(csv())
   .on('data', (row) => products.push(row))
-  .on('end', () => console.log(`✅ Loaded ${products.length} products into memory`));
+  .on('end', () => {
+    console.log(`✅ Loaded ${products.length} products into memory`);
 
-// Load reviews CSV
-fs.createReadStream('./reviews.csv')
-  .pipe(csv())
-  .on('data', (row) => reviews.push(row))
-  .on('end', () => console.log(`✅ Loaded ${reviews.length} reviews into memory`));
+    // ✅ After product file is loaded, THEN load reviews
+    fs.createReadStream('./reviews.csv')
+      .pipe(csv())
+      .on('data', (row) => reviews.push(row))
+      .on('end', () => {
+        console.log(`✅ Loaded ${reviews.length} reviews into memory`);
+
+        // ✅ After both are loaded, start server
+        app.listen(3000, () => {
+          console.log('🚀 Server running on port 3000');
+        });
+      });
+  });
 
 // Chat endpoint
 app.post('/chat', async (req, res) => {
