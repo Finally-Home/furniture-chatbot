@@ -29,18 +29,25 @@ fs.createReadStream('./main-products-cleaned.csv')
         console.log(`✅ Loaded ${reviews.length} reviews into memory`);
 
         // ✅ Chatbot endpoint
-        app.post('/chat', async (req, res) => {
-          try {
-            const { messages } = req.body;
-            const firstProduct = products[0]?.Title || 'No products loaded';
-            res.json({
-              response: `You asked: ${messages}. First product I know is: ${firstProduct}`
-            });
-          } catch (err) {
-            console.error('❌ Chatbot error:', err);
-            res.status(500).json({ error: 'Something went wrong.' });
-          }
-        });
+        app.post('/chat', (req, res) => {
+  try {
+    const { messages } = req.body;
+
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ error: 'Invalid messages format.' });
+    }
+
+    const userMessage = messages[messages.length - 1]?.content || 'No message found';
+    const productName = products[0]?.Title || 'No product found';
+
+    res.json({
+      response: `You said: "${userMessage}". First product is: ${productName}.`
+    });
+  } catch (err) {
+    console.error('❌ Chatbot error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
 
         // ✅ Start server
         app.listen(3000, () => {
