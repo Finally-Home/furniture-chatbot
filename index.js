@@ -1,5 +1,4 @@
 import express from 'express';
-import axios from 'axios';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import fs from 'node:fs';
@@ -11,53 +10,53 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const products = [];
 
-
-fs.createReadStream('./main-products-cleaned.csv')
+// Load products from CSV
+fs.createReadStream('./chatbot-products.csv')
   .pipe(csv())
   .on('data', (row) => products.push(row))
   .on('end', () => {
-    fs.createReadStream('./reviews.csv')
-      .pipe(csv())
-      .on('data', (row) => reviews.push(row))
-      .on('end', () => {
-        app.post('/chat', async (req, res) => {
-          const messages = req.body.messages;
+    console.log(`✅ Loaded ${products.length} products`);
 
-          if (!messages || !Array.isArray(messages) || messages.length === 0) {
-            return res.status(400).json({ error: "Invalid messages format." });
-          }
+    // Simple chatbot endpoint
+    app.post('/chat', (req, res) => {
+      const messages = req.body.messages;
 
-          const userMessage = messages[0];
-          const lowerMsg = userMessage.toLowerCase();
-          const priceMatch = userMessage.match(/\$?(\d+)(?!\d)/);
-          const maxPrice = priceMatch ? parseInt(priceMatch[1]) : null;
+      if (!messages || !Array.isArray(messages) || messages.length === 0) {
+        return res.status(400).json({ error: "Invalid messages format." });
+      }
 
-          let filtered = products;
+      const userMessage = messages[0];
+      const lowerMsg = userMessage.toLowerCase();
+      const priceMatch = userMessage.match(/\$?(\d+)(?!\d)/);
+      const maxPrice = priceMatch ? parseInt(priceMatch[1]) : null;
 
-          if (lowerMsg.includes('sectional')) {
-            filtered = filtered.filter(p =>
-              p.title.toLowerCase().includes('sectional')
-            );
-          }
+      let filtered = products;
 
-          if (maxPrice) {
-            filtered = filtered.filter(p => {
-              const price = parseFloat(p.price || '0');
-              return price <= maxPrice;
-            });
-          }
+      if (lowerMsg.includes('sectional')) {
+        filtered = filtered.filter(p =>
+          p.title && p.title.toLowerCase().includes('sectional')
+        );
+      }
 
-          const firstResult = filtered[0];
-          const responseText = firstResult
-            ? `You asked: "${userMessage}". First matching product: ${firstResult.title} – $${firstResult.price}`
-            : `You asked: "${userMessage}". Sorry, I couldn't find any matching products.`;
-
-          res.json({ response: responseText });
+      if (maxPrice) {
+        filtered = filtered.filter(p => {
+          const price = parseFloat(p.price || '0');
+          return !isNaN(price) && price <= maxPrice;
         });
+      }
 
-                app.listen(3000, () => {
-          console.log('🚀 Server running on port 3000');
-        });
-      }); // closes .on('end') for reviews.csv
-  });     // closes .on('end') for products.csv
+      const firstResult = filtered[0];
+      const responseText = firstResult
+        ? `You asked: "${userMessage}". First matching product: ${firstResult.title} – $${firstResult.price}`
+        : `You asked: "${userMessage}". Sorry, I couldn't find any matching products.`;
+
+      res.json({ response: responseText });
+    });
+
+    // Start server after products are loaded
+    app.listen(3000, () => {
+      console.log('🚀 Server running on port 3000');
+    });
+  });
