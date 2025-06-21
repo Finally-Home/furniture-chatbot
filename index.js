@@ -11,8 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const products = [];
-const reviews = [];
+
 
 fs.createReadStream('./main-products-cleaned.csv')
   .pipe(csv())
